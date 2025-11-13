@@ -25,5 +25,13 @@
       "96": "icons/icon-96.svg"
     },
     "default_title": "Format & View"
+  },
+
+  "browser_specific_settings": {
+    "gecko": {
+      "data_collection_permissions": {
+        "required": ["none"]
+      }
+    }
   }
 }
