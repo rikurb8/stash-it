@@ -1,21 +1,36 @@
-# Stash It - Firefox Extension
+# Stash It
 
-Your personal stash for code snippets and interesting links. Select, stash, and revisit whenever you need them.
+<div align="center">
+  <img src="screenshots/banner.png" alt="Stash It">
+</div>
+
+> Remember you might need it later... so stash it!
 
 ## What's This About?
 
-Ever find yourself copying JSON blobs or XML configs between tabs? Or bookmarking links you know you'll forget about? **Stash It** is your snippet treasure chest - select any JSON or XML text, right-click to stash it, and it gets beautifully formatted with syntax highlighting. Also works for saving links you want to revisit later.
+Stash It is a Firefox extension that allows you to stash things in your browser. Have a code snippet you might need later? See an interesting article but don't have time to read it right now? Stash It combines a scratchpad, journal, reading list in to one convenient place.
 
-Think of it as your code snippet pocket, but way prettier.
+## Use cases
 
-## Features
+### Code Snippets
 
-- **Smart Formatting**: Automatically detects and formats JSON and XML with proper indentation
-- **Pretty Syntax Highlighting**: Uses highlight.js with GitHub Dark theme (easy on the eyes)
-- **Quick Access**: Right-click menu or keyboard shortcuts
-- **Link Stashing**: Save interesting links for later with a quick shortcut
-- **History Sidebar**: Browse through your stash collection
-- **Clean Dark UI**: Modern interface that doesn't burn your retinas
+Investigating a bug? Stash code snippets, log lines or whatever needed. Stash it auto-formats your snippet and gives you syntax highlighting.
+
+### Research assistant
+
+While researching a topic, store related links and notes. Stash It will help you keep track of your work.
+
+### Reminder
+
+See a interesting article but don't have time to read it right now? Stash it and come back to it later.
+
+## How it works
+
+- Add snippets to stash by selecting text and right-clicking. "Stash selected snippet" will open a new tab with the snippet formatted and syntax highlighted.
+
+- Press `Cmd+Shift+U` (Mac) to stash current page.
+
+- Press `Cmd+Shift+L` (Mac) to open stash.
 
 ## Installation
 
@@ -30,6 +45,7 @@ Think of it as your code snippet pocket, but way prettier.
 ### Option 2: Install as Permanent Add-on
 
 1. Package the extension:
+
    ```bash
    cd browser-formatted-viewer
    zip -r stash-it.xpi *
@@ -41,6 +57,7 @@ Think of it as your code snippet pocket, but way prettier.
 5. Confirm the installation
 
 **Note**: Firefox requires extensions to be signed for permanent installation. For personal use, you can:
+
 - Use temporary add-on loading for development
 - Enable `xpinstall.signatures.required` to `false` in `about:config` (not recommended for security reasons)
 - Submit to Mozilla Add-ons for signing
@@ -50,6 +67,7 @@ Think of it as your code snippet pocket, but way prettier.
 For detailed instructions on publishing this extension to Mozilla Add-ons (AMO), see [PUBLISHING.md](PUBLISHING.md).
 
 Quick start:
+
 ```bash
 # Install dependencies
 npm install
@@ -84,11 +102,18 @@ npm run build
 ### Example Content to Test
 
 **JSON:**
+
 ```json
-{"name":"John Doe","age":30,"city":"New York","hobbies":["reading","coding","gaming"]}
+{
+  "name": "John Doe",
+  "age": 30,
+  "city": "New York",
+  "hobbies": ["reading", "coding", "gaming"]
+}
 ```
 
 **XML:**
+
 ```xml
 <?xml version="1.0"?><note><to>Tove</to><from>Jani</from><heading>Reminder</heading><body>Don't forget me this weekend!</body></note>
 ```
@@ -188,16 +213,18 @@ Replace `src/lib/github-dark.min.css` with another highlight.js theme, and updat
 ### Modify Formatting Options
 
 **JSON** (src/formatters/jsonFormatter.js):
+
 ```javascript
 return JSON.stringify(parsed, null, 2); // Change '2' for different indentation
 ```
 
 **XML** (src/formatters/xmlFormatter.js):
+
 ```javascript
 const formatted = xmlFormatter(text, {
-  indentation: '  ',      // Change indentation
-  collapseContent: true,  // Collapse empty tags
-  lineSeparator: '\n'     // Line separator
+  indentation: "  ", // Change indentation
+  collapseContent: true, // Collapse empty tags
+  lineSeparator: "\n", // Line separator
 });
 ```
 
