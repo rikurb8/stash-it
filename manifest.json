@@ -1,8 +1,8 @@
 {
   "manifest_version": 2,
-  "name": "Format & View",
-  "version": "1.0.0",
-  "description": "Format and syntax-highlight JSON/XML text in a new tab",
+  "name": "Stash It",
+  "version": "0.1.0",
+  "description": "Stash code snippets and links for later - your personal snippet haven",
 
   "permissions": [
     "contextMenus",
@@ -24,7 +24,7 @@
       "48": "icons/icon-48.svg",
       "96": "icons/icon-96.svg"
     },
-    "default_title": "Format & View"
+    "default_title": "Stash It"
   },
 
   "commands": {
@@ -33,7 +33,7 @@
         "default": "Ctrl+Shift+L",
         "mac": "Command+Shift+L"
       },
-      "description": "Format and open selected text in new tab"
+      "description": "Stash selected snippet in new tab"
     },
     "save-link": {
       "suggested_key": {

@@ -1,6 +1,6 @@
-# Publishing Guide for Format & View Firefox Extension
+# Publishing Guide for Stash It Firefox Extension
 
-This guide covers everything you need to know about packaging, signing, and publishing the Format & View extension to Mozilla Add-ons (AMO).
+This guide covers everything you need to know about packaging, signing, and publishing the Stash It extension to Mozilla Add-ons (AMO).
 
 ## Table of Contents
 
@@ -56,7 +56,7 @@ Before you can publish the extension, you'll need:
 npm run build
 ```
 
-This creates a `.zip` file in the `web-ext-artifacts/` directory. The file will be named something like `format_view-1.0.0.zip`.
+This creates a `.zip` file in the `web-ext-artifacts/` directory. The file will be named something like `stash_it-0.1.0.zip`.
 
 ### Method 2: Manual Build
 
@@ -67,7 +67,7 @@ If you prefer to build manually:
 npx web-ext build --overwrite-dest
 
 # Or using zip
-zip -r format-and-view.xpi . -x '*.git*' 'node_modules/*' 'web-ext-artifacts/*' '*.md'
+zip -r stash-it.xpi . -x '*.git*' 'node_modules/*' 'web-ext-artifacts/*' '*.md'
 ```
 
 ### What Gets Included?
@@ -128,7 +128,7 @@ Manually install the built `.zip` file:
 1. **Prepare Your Listing Information**
 
    Before submitting, prepare:
-   - Extension name: "Format & View"
+   - Extension name: "Stash It"
    - Summary (250 characters max): Brief description of functionality
    - Description: Detailed feature list and usage instructions
    - Category: Developer Tools or Productivity
@@ -171,7 +171,7 @@ Manually install the built `.zip` file:
    npm run package:source
    ```
 
-   This creates `format-and-view-source.zip` in the parent directory. Include a `README.md` in the source package explaining:
+   This creates `stash-it-source.zip` in the parent directory. Include a `README.md` in the source package explaining:
    - How to install dependencies
    - How to build the extension
    - Any special requirements

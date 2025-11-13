@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Format & View is a Firefox extension (Manifest V2) that formats and syntax-highlights JSON and XML content in a new tab. Users select text on any webpage, right-click, and choose "Format and Open in New Tab" to view beautifully formatted code.
+Stash It is a Firefox extension (Manifest V2) that lets users stash code snippets and links for later. Select JSON or XML text on any webpage, right-click, and choose "Stash selected snippet" to view beautifully formatted and syntax-highlighted code in a new tab. Also supports quick link saving via keyboard shortcut.
 
 ## Development Commands
 
@@ -48,7 +48,7 @@ browser-formatted-viewer/
 ```
 
 ### Extension Flow
-1. **Context Menu Creation** (src/background/background.js): Creates "Format and Open in New Tab" menu item on extension install
+1. **Context Menu Creation** (src/background/background.js): Creates "Stash selected snippet" menu item on extension install
 2. **Content Capture** (src/background/background.js): On menu click, captures selected text and stores in `browser.storage.local`
 3. **New Tab Display** (src/ui/viewer.html): Opens viewer page in new tab
 4. **Format Detection** (src/utils/formatDetector.js): Automatically detects JSON vs XML based on content structure

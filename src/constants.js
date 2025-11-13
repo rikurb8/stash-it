@@ -13,5 +13,5 @@ const FORMAT_TYPES = {
 
 // Context menu IDs
 const MENU_IDS = {
-  FORMAT_AND_VIEW: 'format-and-view'
+  STASH_IT: 'stash-it'
 };

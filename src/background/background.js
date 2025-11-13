@@ -1,15 +1,15 @@
 // Create context menu item when extension is installed
 browser.runtime.onInstalled.addListener(() => {
   browser.contextMenus.create({
-    id: "format-and-view",
-    title: "Format and Open in New Tab",
+    id: "stash-it",
+    title: "Stash selected snippet",
     contexts: ["selection"]
   });
 });
 
 // Handle context menu clicks
 browser.contextMenus.onClicked.addListener((info, tab) => {
-  if (info.menuItemId === "format-and-view" && info.selectionText) {
+  if (info.menuItemId === "stash-it" && info.selectionText) {
     formatAndOpenText(info.selectionText);
   }
 });

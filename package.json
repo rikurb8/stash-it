@@ -1,13 +1,13 @@
 {
-  "name": "format-and-view",
-  "version": "1.0.0",
-  "description": "Firefox extension that formats and syntax-highlights JSON/XML text in a new tab",
+  "name": "stash-it",
+  "version": "0.1.0",
+  "description": "Firefox extension for stashing code snippets and links - your personal snippet haven",
   "scripts": {
     "lint": "web-ext lint",
     "build": "npm run package",
     "package": "web-ext build --overwrite-dest",
-    "package:source": "npm run package:source:clean && zip -r ../format-and-view-source.zip . -x '*.git*' 'node_modules/*' 'web-ext-artifacts/*'",
-    "package:source:clean": "rm -f ../format-and-view-source.zip",
+    "package:source": "npm run package:source:clean && zip -r ../stash-it-source.zip . -x '*.git*' 'node_modules/*' 'web-ext-artifacts/*'",
+    "package:source:clean": "rm -f ../stash-it-source.zip",
     "start": "web-ext run --start-url https://json.org/example.html",
     "sign": "web-ext sign --api-key=$WEB_EXT_API_KEY --api-secret=$WEB_EXT_API_SECRET",
     "test": "web-ext lint",

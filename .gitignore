@@ -4,7 +4,7 @@
 
 # Build artifacts
 web-ext-artifacts/
-../format-and-view-source.zip
+../stash-it-source.zip
 dist/
 
 # Dependencies

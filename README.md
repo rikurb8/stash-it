@@ -1,15 +1,21 @@
-# Format & View - Firefox Extension
+# Stash It - Firefox Extension
 
-A Firefox extension that formats and syntax-highlights JSON and XML content in a new tab. Simply select text, right-click, and choose "Format and Open in New Tab" to view beautifully formatted and highlighted code.
+Your personal stash for code snippets and interesting links. Select, stash, and revisit whenever you need them.
+
+## What's This About?
+
+Ever find yourself copying JSON blobs or XML configs between tabs? Or bookmarking links you know you'll forget about? **Stash It** is your snippet treasure chest - select any JSON or XML text, right-click to stash it, and it gets beautifully formatted with syntax highlighting. Also works for saving links you want to revisit later.
+
+Think of it as your code snippet pocket, but way prettier.
 
 ## Features
 
-- **JSON Formatting**: Automatically detects and formats JSON with proper indentation
-- **XML Formatting**: Formats XML with clean structure using xml-formatter
-- **Syntax Highlighting**: Uses highlight.js with GitHub Dark theme
-- **Context Menu Integration**: Easy access via right-click menu
-- **Clean UI**: Modern, dark-themed interface
-- **Error Handling**: Clear error messages for invalid JSON/XML
+- **Smart Formatting**: Automatically detects and formats JSON and XML with proper indentation
+- **Pretty Syntax Highlighting**: Uses highlight.js with GitHub Dark theme (easy on the eyes)
+- **Quick Access**: Right-click menu or keyboard shortcuts
+- **Link Stashing**: Save interesting links for later with a quick shortcut
+- **History Sidebar**: Browse through your stash collection
+- **Clean Dark UI**: Modern interface that doesn't burn your retinas
 
 ## Installation
 
@@ -26,12 +32,12 @@ A Firefox extension that formats and syntax-highlights JSON and XML content in a
 1. Package the extension:
    ```bash
    cd browser-formatted-viewer
-   zip -r format-and-view.xpi *
+   zip -r stash-it.xpi *
    ```
 
 2. In Firefox, go to `about:addons`
 3. Click the gear icon ⚙️ and select "Install Add-on From File..."
-4. Select the `format-and-view.xpi` file
+4. Select the `stash-it.xpi` file
 5. Confirm the installation
 
 **Note**: Firefox requires extensions to be signed for permanent installation. For personal use, you can:
@@ -56,13 +62,24 @@ npm run build
 
 ## Usage
 
+### Stashing Code Snippets
+
 1. **Select Text**: Highlight JSON or XML text on any webpage
-2. **Right-Click**: Open the context menu
-3. **Click "Format and Open in New Tab"**: The extension will:
-   - Detect if the content is JSON or XML
-   - Format it with proper indentation
-   - Apply syntax highlighting
-   - Open in a new tab with a clean interface
+2. **Right-Click**: Open the context menu and choose "Stash selected snippet"
+   - Or use the keyboard shortcut: `Ctrl+Shift+L` (Windows/Linux) or `Cmd+Shift+L` (Mac)
+3. **View Your Stash**: A new tab opens with your beautifully formatted snippet
+
+### Stashing Links
+
+1. **Navigate** to any page worth revisiting
+2. **Press** `Ctrl+Shift+U` (Windows/Linux) or `Cmd+Shift+U` (Mac)
+3. **Done**: The link is saved to your history
+
+### Browsing Your Stash
+
+- Click the History sidebar to see all your stashed snippets and links
+- Click on any snippet to view it again
+- Click on any link to open it in a new tab
 
 ### Example Content to Test
 
@@ -80,54 +97,51 @@ npm run build
 
 ### Architecture
 
-- **manifest.json**: Extension configuration and permissions
-- **background.js**: Handles context menu creation and click events
-- **viewer.html**: Display page for formatted content
-- **viewer.js**: Formatting and highlighting logic
-- **viewer.css**: Styling for the viewer page
-- **icons/**: Extension icons (SVG format)
+```
+browser-formatted-viewer/
+├── src/
+│   ├── background/
+│   │   └── background.js      # Context menu and storage
+│   ├── content/
+│   │   └── viewer.js          # Main viewer logic
+│   ├── formatters/
+│   │   ├── jsonFormatter.js   # JSON formatting
+│   │   └── xmlFormatter.js    # XML formatting
+│   ├── ui/
+│   │   ├── viewer.html        # Display page
+│   │   └── viewer.css         # Dark-themed styling
+│   ├── utils/
+│   │   ├── formatDetector.js  # Format detection
+│   │   └── historyManager.js  # History utilities
+│   ├── lib/                   # Bundled libraries
+│   └── constants.js           # Shared constants
+├── icons/                     # Extension icons
+├── manifest.json              # Extension config
+└── package.json
+```
 
 ### Libraries Used
 
-- **[highlight.js](https://highlightjs.org/)** (v11.9.0): Syntax highlighting
-  - CDN: `https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/`
-  - Theme: GitHub Dark
-
+- **[highlight.js](https://highlightjs.org/)** (v11.9.0): Syntax highlighting with GitHub Dark theme
 - **[xml-formatter](https://www.npmjs.com/package/xml-formatter)** (v3.6.3): XML formatting
-  - CDN: `https://cdn.jsdelivr.net/npm/xml-formatter@3.6.3/dist/browser/xml-formatter.min.js`
 
 ### Permissions
 
 - `contextMenus`: Create the right-click menu item
 - `activeTab`: Access selected text from the current page
-- `storage`: Temporarily store content for the viewer page
+- `storage`: Store snippets and links locally
 
 ### How It Works
 
-1. User selects text and clicks the context menu item
+1. User selects text and clicks context menu or uses keyboard shortcut
 2. `background.js` captures the selected text
 3. Text is stored in `browser.storage.local`
 4. New tab opens with `viewer.html`
 5. `viewer.js` retrieves the text from storage
-6. Format is detected (JSON or XML)
-7. Content is formatted using appropriate library
+6. Format is auto-detected (JSON or XML)
+7. Content is formatted using the appropriate formatter
 8. Syntax highlighting is applied with highlight.js
-9. Storage is cleared after loading
-
-## File Structure
-
-```
-browser-formatted-viewer/
-├── manifest.json          # Extension configuration
-├── background.js          # Background script for context menu
-├── viewer.html           # Viewer page for formatted content
-├── viewer.js             # Formatting and highlighting logic
-├── viewer.css            # Styling for viewer page
-├── icons/                # Extension icons
-│   ├── icon-48.svg       # 48x48 icon
-│   └── icon-96.svg       # 96x96 icon
-└── README.md             # This file
-```
+9. Storage is cleared after loading (except history)
 
 ## Development
 
@@ -135,7 +149,6 @@ browser-formatted-viewer/
 
 - Firefox Browser (version 48+)
 - Node.js and npm (for build tools)
-- Basic understanding of WebExtensions API
 
 ### Setup
 
@@ -170,24 +183,16 @@ npm install
 
 ### Change Highlight.js Theme
 
-Edit `viewer.html` line 11:
-
-```html
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
-```
-
-Available themes: [Highlight.js Demo](https://highlightjs.org/examples)
+Replace `src/lib/github-dark.min.css` with another highlight.js theme, and update the link reference in `src/ui/viewer.html`.
 
 ### Modify Formatting Options
 
-Edit `viewer.js` to customize formatting:
-
-**JSON** (line 31):
+**JSON** (src/formatters/jsonFormatter.js):
 ```javascript
 return JSON.stringify(parsed, null, 2); // Change '2' for different indentation
 ```
 
-**XML** (lines 38-42):
+**XML** (src/formatters/xmlFormatter.js):
 ```javascript
 const formatted = xmlFormatter(text, {
   indentation: '  ',      // Change indentation
@@ -212,8 +217,7 @@ const formatted = xmlFormatter(text, {
 
 ### Syntax Highlighting Not Working
 
-- Check internet connection (libraries loaded from CDN)
-- Verify CDN URLs are accessible
+- Libraries are bundled locally, so no internet connection needed
 - Check Browser Console for loading errors
 
 ## Browser Compatibility
@@ -234,4 +238,4 @@ MIT License - Feel free to use and modify as needed.
 
 ## Contributing
 
-Feel free to submit issues and enhancement requests!
+Found a bug? Got an idea? Feel free to submit issues and enhancement requests!
