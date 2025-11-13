@@ -27,6 +27,16 @@
     "default_title": "Format & View"
   },
 
+  "commands": {
+    "format-selection": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+L",
+        "mac": "Command+Shift+L"
+      },
+      "description": "Format and open selected text in new tab"
+    }
+  },
+
   "browser_specific_settings": {
     "gecko": {
       "data_collection_permissions": {

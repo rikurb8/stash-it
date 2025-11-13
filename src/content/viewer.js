@@ -10,9 +10,23 @@ const formatType = document.getElementById('format-type');
 const loading = document.getElementById('loading');
 const historyList = document.getElementById('history-list');
 const clearAllBtn = document.getElementById('clear-all-btn');
+const welcomeScreen = document.getElementById('welcome-screen');
 
 // Current active history item
 let currentHistoryId = null;
+
+// Show welcome screen
+function showWelcome() {
+  welcomeScreen.classList.remove('hidden');
+  loading.classList.add('hidden');
+  codeContainer.classList.add('hidden');
+  errorMessage.classList.add('hidden');
+}
+
+// Hide welcome screen
+function hideWelcome() {
+  welcomeScreen.classList.add('hidden');
+}
 
 // Display error message
 function showError(message) {
@@ -20,6 +34,7 @@ function showError(message) {
   errorMessage.classList.remove('hidden');
   loading.classList.add('hidden');
   codeContainer.classList.add('hidden');
+  welcomeScreen.classList.add('hidden');
 }
 
 // Display formatted content
@@ -50,8 +65,9 @@ function displayContent(content, format, historyId = null) {
     // Apply syntax highlighting
     hljs.highlightElement(codeContent);
 
-    // Show the code container and hide loading
+    // Show the code container and hide loading/welcome
     loading.classList.add('hidden');
+    welcomeScreen.classList.add('hidden');
     codeContainer.classList.remove('hidden');
 
     // Update active history item
@@ -124,12 +140,11 @@ async function deleteHistoryItemAndUpdate(id) {
   const success = await deleteHistoryItem(id);
 
   if (success) {
-    // If we deleted the currently displayed item, clear the view
+    // If we deleted the currently displayed item, show welcome screen
     if (currentHistoryId === id) {
       currentHistoryId = null;
       codeContainer.classList.add('hidden');
-      loading.classList.remove('hidden');
-      loading.querySelector('p').textContent = 'Select a history item or format new content';
+      showWelcome();
     }
 
     displayHistoryList();
@@ -143,8 +158,7 @@ async function clearAllHistoryAndUpdate() {
   if (success) {
     currentHistoryId = null;
     codeContainer.classList.add('hidden');
-    loading.classList.remove('hidden');
-    loading.querySelector('p').textContent = 'No history. Format some content to get started.';
+    showWelcome();
     displayHistoryList();
   }
 }
@@ -160,6 +174,7 @@ async function loadHistoryItem(id) {
       return;
     }
 
+    hideWelcome();
     displayContent(item.content, item.format, id);
   } catch (error) {
     showError(`Error loading history item: ${error.message}`);
@@ -176,8 +191,8 @@ async function loadContent() {
     const result = await browser.storage.local.get(['formatterContent']);
 
     if (!result.formatterContent) {
-      // No new content, just show the history
-      loading.querySelector('p').textContent = 'Select a history item or format new content';
+      // No new content, show welcome screen
+      showWelcome();
       return;
     }
 
@@ -193,6 +208,7 @@ async function loadContent() {
     await displayHistoryList();
 
     // Display formatted content
+    hideWelcome();
     displayContent(content, format, historyId);
 
     // Clear temporary storage after loading
