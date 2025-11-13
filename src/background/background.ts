@@ -19,7 +19,7 @@ browser.commands.onCommand.addListener((command) => {
   if (command === "format-selection") {
     // Query the active tab to get selected text
     browser.tabs.query({ active: true, currentWindow: true }).then(tabs => {
-      if (tabs[0]) {
+      if (tabs[0] && tabs[0].id) {
         // Execute a content script to get the selected text
         browser.tabs.executeScript(tabs[0].id, {
           code: 'window.getSelection().toString();'
@@ -60,7 +60,7 @@ browser.commands.onCommand.addListener((command) => {
 });
 
 // Shared function to format and open text in new tab
-function formatAndOpenText(selectedText) {
+function formatAndOpenText(selectedText: string): void {
   // If no text selected, just open the viewer (will show welcome page)
   if (!selectedText || selectedText.trim() === "") {
     browser.tabs.create({

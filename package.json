@@ -3,12 +3,14 @@
   "version": "0.1.0",
   "description": "Firefox extension for stashing code snippets and links - your personal snippet haven",
   "scripts": {
+    "compile": "tsc",
+    "watch": "tsc --watch",
     "lint": "web-ext lint",
-    "build": "npm run package",
+    "build": "npm run compile && npm run package",
     "package": "web-ext build --overwrite-dest",
-    "package:source": "npm run package:source:clean && zip -r ../stash-it-source.zip . -x '*.git*' 'node_modules/*' 'web-ext-artifacts/*'",
+    "package:source": "npm run package:source:clean && zip -r ../stash-it-source.zip . -x '*.git*' 'node_modules/*' 'web-ext-artifacts/*' 'dist/*'",
     "package:source:clean": "rm -f ../stash-it-source.zip",
-    "start": "web-ext run --start-url https://json.org/example.html",
+    "start": "npm run compile && web-ext run --start-url https://json.org/example.html",
     "sign": "web-ext sign --api-key=$WEB_EXT_API_KEY --api-secret=$WEB_EXT_API_SECRET",
     "test": "web-ext lint",
     "commit": "npx zx tools/commit-changes.mjs"
@@ -29,6 +31,8 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
+    "@types/firefox-webext-browser": "^143.0.0",
+    "typescript": "^5.9.3",
     "web-ext": "^8.3.0"
   },
   "webExt": {
@@ -42,7 +46,10 @@
       "package-lock.json",
       "web-ext-artifacts",
       "*.md",
-      ".web-ext-config.js"
+      ".web-ext-config.cjs",
+      "src/**/*.ts",
+      "tsconfig.json",
+      "tools/**"
     ]
   },
   "dependencies": {

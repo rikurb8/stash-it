@@ -11,7 +11,7 @@
   ],
 
   "background": {
-    "scripts": ["src/background/background.js"]
+    "scripts": ["dist/background/background.js"]
   },
 
   "icons": {

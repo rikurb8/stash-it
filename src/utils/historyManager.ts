@@ -1,8 +1,27 @@
+interface SnippetHistoryItem {
+  id: string;
+  type: 'snippet';
+  content: string;
+  format: 'json' | 'xml';
+  timestamp: number;
+}
+
+interface LinkHistoryItem {
+  id: string;
+  type: 'link';
+  url: string;
+  title: string;
+  favIconUrl: string | null;
+  timestamp: number;
+}
+
+type HistoryItem = SnippetHistoryItem | LinkHistoryItem;
+
 // Load history from storage
-async function loadHistory() {
+async function loadHistory(): Promise<HistoryItem[]> {
   try {
     const result = await browser.storage.local.get(['formatHistory']);
-    return result.formatHistory || [];
+    return (result.formatHistory as HistoryItem[]) || [];
   } catch (error) {
     console.error('Error loading history:', error);
     return [];
@@ -10,11 +29,11 @@ async function loadHistory() {
 }
 
 // Save snippet to history
-async function saveToHistory(content, format) {
+async function saveToHistory(content: string, format: 'json' | 'xml'): Promise<string | null> {
   try {
     const history = await loadHistory();
 
-    const historyItem = {
+    const historyItem: SnippetHistoryItem = {
       id: Date.now().toString(),
       type: 'snippet',
       content: content,
@@ -37,11 +56,11 @@ async function saveToHistory(content, format) {
 }
 
 // Save link to history
-async function saveLinkToHistory(url, title, favIconUrl = null) {
+async function saveLinkToHistory(url: string, title: string, favIconUrl: string | null = null): Promise<string | null> {
   try {
     const history = await loadHistory();
 
-    const historyItem = {
+    const historyItem: LinkHistoryItem = {
       id: Date.now().toString(),
       type: 'link',
       url: url,
@@ -65,7 +84,7 @@ async function saveLinkToHistory(url, title, favIconUrl = null) {
 }
 
 // Delete a history item
-async function deleteHistoryItem(id) {
+async function deleteHistoryItem(id: string): Promise<boolean> {
   try {
     const history = await loadHistory();
     const filtered = history.filter(item => item.id !== id);
@@ -79,7 +98,7 @@ async function deleteHistoryItem(id) {
 }
 
 // Clear all history
-async function clearAllHistory() {
+async function clearAllHistory(): Promise<boolean> {
   try {
     await browser.storage.local.set({ formatHistory: [] });
     return true;
@@ -90,10 +109,10 @@ async function clearAllHistory() {
 }
 
 // Format timestamp for display
-function formatTimestamp(timestamp) {
+function formatTimestamp(timestamp: number): string {
   const date = new Date(timestamp);
   const now = new Date();
-  const diff = now - date;
+  const diff = now.getTime() - date.getTime();
 
   // Less than 1 minute
   if (diff < 60000) {

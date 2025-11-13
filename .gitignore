@@ -6,6 +6,7 @@
 web-ext-artifacts/
 ../stash-it-source.zip
 dist/
+.web-ext-config.cjs
 
 # Dependencies
 node_modules/

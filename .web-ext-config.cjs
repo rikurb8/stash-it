@@ -1,26 +1,17 @@
 module.exports = {
-  // Global options:
-  verbose: false,
-  // Command options:
-  build: {
-    overwriteDest: true,
-  },
+  sourceDir: '.',
+  artifactsDir: './web-ext-artifacts',
   ignoreFiles: [
-    '.git',
+    '.git/**',
     '.gitignore',
-    'node_modules',
+    'node_modules/**',
     'package.json',
     'package-lock.json',
-    'web-ext-artifacts',
+    'web-ext-artifacts/**',
     '*.md',
-    '.web-ext-config.cjs',
-    'PUBLISHING.md',
-    'README.md',
-    'dist',
-    'screenshots',
-    '.github'
-  ],
-  run: {
-    startUrl: ['about:debugging#/runtime/this-firefox'],
-  },
+    '.web-ext-config.js',
+    'src/**/*.ts',
+    'tsconfig.json',
+    'tools/**',
+  ]
 };

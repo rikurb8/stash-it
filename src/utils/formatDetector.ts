@@ -1,5 +1,5 @@
 // Detect if content is JSON or XML
-function detectFormat(text) {
+function detectFormat(text: string): 'json' | 'xml' {
   const trimmed = text.trim();
 
   // Check if it starts with JSON characters
