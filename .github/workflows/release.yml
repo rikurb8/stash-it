@@ -1,0 +1,88 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*' # Triggers on version tags like v1.0.0, v1.0.1, etc.
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Required to create releases
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Fetch full history for commit messages
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint extension
+        run: npm run lint
+
+      - name: Build extension
+        run: npm run build
+
+      - name: Get extension artifact name
+        id: artifact
+        run: |
+          ARTIFACT=$(ls web-ext-artifacts/*.zip | head -n 1)
+          echo "path=$ARTIFACT" >> $GITHUB_OUTPUT
+          echo "name=$(basename $ARTIFACT)" >> $GITHUB_OUTPUT
+
+      - name: Get version from tag
+        id: version
+        run: echo "version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Generate release notes
+        id: release_notes
+        run: |
+          # Get the previous tag
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+
+          # Generate release notes
+          if [ -z "$PREV_TAG" ]; then
+            # First release - get all commits
+            COMMITS=$(git log --pretty=format:"- %s (%h)" --reverse)
+          else
+            # Get commits since previous tag
+            COMMITS=$(git log ${PREV_TAG}..HEAD --pretty=format:"- %s (%h)" --reverse)
+          fi
+
+          # Create release notes file
+          cat > release_notes.md << EOF
+          ## Changes
+
+          ${COMMITS}
+
+          ## Installation
+
+          Download the \`.zip\` file and install it in Firefox:
+          1. Open Firefox and navigate to \`about:addons\`
+          2. Click the gear icon and select "Install Add-on From File..."
+          3. Select the downloaded \`.zip\` file
+
+          Or install from [Mozilla Add-ons](https://addons.mozilla.org/) (if published).
+          EOF
+
+          echo "notes_file=release_notes.md" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Release ${{ steps.version.outputs.version }}
+          body_path: ${{ steps.release_notes.outputs.notes_file }}
+          files: ${{ steps.artifact.outputs.path }}
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
