@@ -1,7 +1,0 @@
-{{#if items.length}}
-  {{#each items}}
-    <div hx-get="/history/item/{{id}}" hx-trigger="load once" hx-swap="outerHTML"></div>
-  {{/each}}
-{{else}}
-  <div class="history-empty">No history yet</div>
-{{/if}}

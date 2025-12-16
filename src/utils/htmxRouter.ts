@@ -1,6 +1,34 @@
 /**
+ * Route handler type for htmx requests
+ */
+type RouteHandler = (data: any) => Promise<{ html: string } | { error: string }>;
+
+/**
+ * Registered routes for htmx requests
+ */
+const routes: Map<string, RouteHandler> = new Map();
+
+/**
+ * Register a route handler
+ */
+function registerRoute(endpoint: string, handler: RouteHandler): void {
+  routes.set(endpoint, handler);
+}
+
+/**
+ * Handle an htmx request by routing to the appropriate handler
+ */
+async function handleRoute(endpoint: string, data: any): Promise<{ html: string } | { error: string }> {
+  const handler = routes.get(endpoint);
+  if (!handler) {
+    return { error: `Unknown endpoint: ${endpoint}` };
+  }
+  return handler(data);
+}
+
+/**
  * Initialize htmx router
- * Intercepts htmx requests and sends them via browser.runtime.sendMessage()
+ * Intercepts htmx requests and routes them to registered handlers
  */
 function initializeHtmxRouter(): void {
   // Configure htmx to work in extension context
@@ -14,13 +42,20 @@ function initializeHtmxRouter(): void {
     event.preventDefault(); // Prevent actual HTTP request
 
     const xhr = event.detail.xhr;
-    const path = event.detail.path;
+    const elt = event.detail.elt; // The element that triggered the request
     const target = event.detail.target;
+
+    // Get the path from htmx attributes (hx-get, hx-post, hx-delete, etc.)
+    const path = elt.getAttribute('hx-get') ||
+                 elt.getAttribute('hx-post') ||
+                 elt.getAttribute('hx-delete') ||
+                 elt.getAttribute('hx-put') ||
+                 elt.getAttribute('hx-patch');
 
     // Parse request data from hx-vals attribute
     let requestData: any = {};
     try {
-      const hxVals = target.getAttribute('hx-vals');
+      const hxVals = elt.getAttribute('hx-vals');
       if (hxVals) {
         requestData = JSON.parse(hxVals);
       }
@@ -29,15 +64,11 @@ function initializeHtmxRouter(): void {
     }
 
     try {
-      // Send message to runtime API handler
-      const response = await browser.runtime.sendMessage({
-        type: 'htmx-request',
-        endpoint: path,
-        data: requestData
-      });
+      // Route to handler directly (no message passing needed)
+      const response = await handleRoute(path, requestData);
 
-      if (!response || response.error) {
-        throw new Error(response?.error || 'No response from handler');
+      if ('error' in response) {
+        throw new Error(response.error);
       }
 
       // Mock successful XHR response
@@ -46,54 +77,17 @@ function initializeHtmxRouter(): void {
       Object.defineProperty(xhr, 'responseText', { value: response.html, writable: false });
 
       // Update target with response HTML
-      target.innerHTML = response.html;
-
-      // Process any new htmx attributes in the swapped content
-      htmx.process(target);
+      if (target) {
+        target.innerHTML = response.html;
+        // Process any new htmx attributes in the swapped content
+        htmx.process(target);
+      }
 
     } catch (error) {
       console.error(`Error in htmx request for ${path}:`, error);
-      target.innerHTML = `<div class="error">Error: ${(error as Error).message}</div>`;
-
-      // Trigger error event
-      event.detail.target.dispatchEvent(
-        new CustomEvent('htmx:responseError', {
-          detail: { xhr, target: event.detail.target, error }
-        })
-      );
+      if (target) {
+        target.innerHTML = `<div class="error">Error: ${(error as Error).message}</div>`;
+      }
     }
   });
-}
-
-/**
- * Dispatch a custom htmx request programmatically
- * @param endpoint - Route endpoint
- * @param data - Request data
- * @param target - Target element for response
- */
-async function dispatchHtmxRequest(
-  endpoint: string,
-  data: any,
-  target: HTMLElement
-): Promise<void> {
-  try {
-    // Send message to runtime API handler
-    const response = await browser.runtime.sendMessage({
-      type: 'htmx-request',
-      endpoint: endpoint,
-      data: data
-    });
-
-    if (!response || response.error) {
-      throw new Error(response?.error || 'No response from handler');
-    }
-
-    // Update target with response HTML
-    target.innerHTML = response.html;
-    htmx.process(target);
-
-  } catch (error) {
-    console.error(`Error in htmx request for ${endpoint}:`, error);
-    target.innerHTML = `<div class="error">Error: ${(error as Error).message}</div>`;
-  }
 }

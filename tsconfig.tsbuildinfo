@@ -1,0 +1,1 @@
+{"root":["./src/constants.ts","./src/background/background.ts","./src/content/viewer.ts","./src/formatters/jsonformatter.ts","./src/formatters/xmlformatter.ts","./src/types/globals.d.ts","./src/utils/formatdetector.ts","./src/utils/historymanager.ts","./src/utils/htmxrouter.ts","./src/utils/renderfunctions.ts"],"version":"5.9.3"}

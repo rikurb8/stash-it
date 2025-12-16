@@ -12,7 +12,3 @@ declare const htmx: {
   };
 };
 
-declare const Handlebars: {
-  compile(template: string): (context: any) => string;
-  registerHelper(name: string, fn: (...args: any[]) => any): void;
-};
