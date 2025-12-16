@@ -44,6 +44,10 @@
     }
   },
 
+  "web_accessible_resources": [
+    "src/templates/*.hbs"
+  ],
+
   "browser_specific_settings": {
     "gecko": {
       "data_collection_permissions": {

@@ -1,11 +1,8 @@
 // highlight.js is loaded globally from lib/highlight.js
 // XML formatter is loaded globally from lib/xml-formatter.js
+// htmx is loaded globally from lib/htmx.min.js
+// Handlebars is loaded globally from lib/handlebars.min.js
 // All utility modules are loaded via script tags
-
-// Type declarations for global libraries
-declare const hljs: {
-  highlightElement(element: HTMLElement): void;
-};
 
 // Get DOM elements
 const codeContent = document.getElementById('code-content') as HTMLElement;
@@ -86,56 +83,19 @@ function displayContent(content: string, format: 'json' | 'xml', historyId: stri
   }
 }
 
-// Display history list
+// Display history list using htmx+Handlebars
 async function displayHistoryList(): Promise<void> {
   const history = await loadHistory();
 
-  if (history.length === 0) {
-    historyList.innerHTML = '<div class="history-empty">No history yet</div>';
-    return;
-  }
+  // Use render function to generate HTML
+  const html = await renderHistoryList(history, currentHistoryId);
+  historyList.innerHTML = html;
 
-  historyList.innerHTML = history.map(item => {
-    if (item.type === 'link') {
-      // Render link item
-      const domain = new URL(item.url).hostname;
-      return `
-        <div class="history-item history-item-link" data-id="${item.id}" data-type="link" data-url="${item.url}">
-          <div class="history-item-header">
-            <span class="history-item-time">${formatTimestamp(item.timestamp)}</span>
-            <span class="history-item-format link">LINK</span>
-            <button class="delete-history-btn" data-id="${item.id}" title="Delete">
-              <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor">
-                <path d="M3.72 3.72a.75.75 0 011.06 0L8 6.94l3.22-3.22a.75.75 0 111.06 1.06L9.06 8l3.22 3.22a.75.75 0 11-1.06 1.06L8 9.06l-3.22 3.22a.75.75 0 01-1.06-1.06L6.94 8 3.72 4.78a.75.75 0 010-1.06z"></path>
-              </svg>
-            </button>
-          </div>
-          <div class="history-item-content">
-            <div class="link-title">${item.title || item.url}</div>
-            <div class="link-domain">${domain}</div>
-          </div>
-        </div>
-      `;
-    } else {
-      // Render snippet item
-      return `
-        <div class="history-item" data-id="${item.id}" data-type="snippet">
-          <div class="history-item-header">
-            <span class="history-item-time">${formatTimestamp(item.timestamp)}</span>
-            <span class="history-item-format ${item.format}">${item.format.toUpperCase()}</span>
-            <button class="delete-history-btn" data-id="${item.id}" title="Delete">
-              <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor">
-                <path d="M3.72 3.72a.75.75 0 011.06 0L8 6.94l3.22-3.22a.75.75 0 111.06 1.06L9.06 8l3.22 3.22a.75.75 0 11-1.06 1.06L8 9.06l-3.22 3.22a.75.75 0 01-1.06-1.06L6.94 8 3.72 4.78a.75.75 0 010-1.06z"></path>
-              </svg>
-            </button>
-          </div>
-        </div>
-      `;
-    }
-  }).join('');
+  // Process htmx attributes in the new content
+  htmx.process(historyList);
 
-  // Add event listeners to history items
-  document.querySelectorAll('.history-item').forEach(item => {
+  // Add click handlers for links (htmx handles snippets and delete)
+  document.querySelectorAll('.history-item-link').forEach(item => {
     item.addEventListener('click', (e) => {
       // Don't trigger if clicking delete button
       if ((e.target as HTMLElement).closest('.delete-history-btn')) {
@@ -143,34 +103,12 @@ async function displayHistoryList(): Promise<void> {
       }
 
       const itemElement = item as HTMLElement;
-      if (itemElement.dataset.type === 'link') {
-        // Open link in new tab
-        const url = itemElement.dataset.url;
-        if (url) {
-          browser.tabs.create({ url: url });
-        }
-      } else {
-        // Load snippet
-        const id = itemElement.dataset.id;
-        if (id) {
-          loadHistoryItem(id);
-        }
+      const url = itemElement.dataset.url;
+      if (url) {
+        browser.tabs.create({ url: url });
       }
     });
   });
-
-  // Add event listeners to delete buttons
-  document.querySelectorAll('.delete-history-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const id = (btn as HTMLElement).dataset.id;
-      if (id) {
-        deleteHistoryItemAndUpdate(id);
-      }
-    });
-  });
-
-  updateHistoryActiveState();
 }
 
 // Update active state of history items
@@ -294,8 +232,107 @@ async function loadContent(): Promise<void> {
   }
 }
 
+// Message handler for htmx API calls
+browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  // Handle htmx requests
+  if (message.type === 'htmx-request') {
+    const { endpoint, data } = message;
+
+    // Route handling
+    (async () => {
+      try {
+        let html = '';
+
+        // Route: Load history item
+        if (endpoint === '/history/load') {
+          const history = await loadHistory();
+          const item = history.find((h: HistoryItem) => h.id === data.id);
+
+          if (!item || item.type !== 'snippet') {
+            sendResponse({ error: 'Item not found' });
+            return;
+          }
+
+          // Update current history ID
+          currentHistoryId = data.id;
+
+          // Update format badge
+          formatType.textContent = item.format.toUpperCase();
+          formatType.className = `format-badge ${item.format}-badge`;
+
+          // Render code display
+          html = await renderCodeDisplay(item.content, item.format);
+
+          // Show code container
+          loading.classList.add('hidden');
+          welcomeScreen.classList.add('hidden');
+          codeContainer.classList.remove('hidden');
+
+          // Update active states in history
+          await displayHistoryList();
+
+          // Apply syntax highlighting after content is inserted
+          setTimeout(() => {
+            const codeElement = document.getElementById('code-content');
+            if (codeElement) {
+              delete (codeElement.dataset as any).highlighted;
+              hljs.highlightElement(codeElement);
+            }
+          }, 0);
+        }
+        // Route: Delete history item
+        else if (endpoint === '/history/delete') {
+          await deleteHistoryItem(data.id);
+
+          // If we deleted the currently displayed item, show welcome screen
+          if (currentHistoryId === data.id) {
+            currentHistoryId = null;
+            codeContainer.classList.add('hidden');
+            showWelcome();
+          }
+
+          // Refresh history list
+          await displayHistoryList();
+
+          // Return empty string (element will be removed by htmx swap)
+          html = '';
+        }
+        // Route: Get single history item
+        else if (endpoint === '/history/item') {
+          const history = await loadHistory();
+          const item = history.find((h: HistoryItem) => h.id === data.id);
+
+          if (!item) {
+            sendResponse({ error: 'Item not found' });
+            return;
+          }
+
+          html = await renderHistoryItem(item, currentHistoryId);
+        }
+        // Unknown endpoint
+        else {
+          sendResponse({ error: `Unknown endpoint: ${endpoint}` });
+          return;
+        }
+
+        // Send HTML response
+        sendResponse({ html });
+      } catch (error) {
+        console.error(`Error handling ${endpoint}:`, error);
+        sendResponse({ error: (error as Error).message });
+      }
+    })();
+
+    // Return true to indicate async response
+    return true;
+  }
+});
+
 // Initialize page
 document.addEventListener('DOMContentLoaded', () => {
+  // Initialize htmx router
+  initializeHtmxRouter();
+
   // Load content and history
   loadContent();
 
